@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tomato Disease Classifier</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #e8f5e9, #ffffff);
+            font-family: Arial, sans-serif;
+            color: #333;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #4CAF50;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        header img {
+            max-height: 60px;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 24px;
+            text-align: center;
+            flex-grow: 1;
+        }
+
+        .glass-container {
+            backdrop-filter: blur(8px);
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-success {
+            background-color: #4CAF50;
+            border: none;
+        }
+
+        .btn-success:hover {
+            background-color: #45A049;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 10px;
+        }
+
+        .carousel-inner {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            padding: 15px;
+        }
+
+        .carousel-caption h5 {
+            color: #4CAF50;
+            font-size: 1.5rem;
+        }
+
+        .carousel-caption p {
+            color: #333;
+        }
+
+        .creator-image {
+            max-width: 150px;
+            height: auto;
+            border-radius: 50%;
+        }
+
+        #emailReveal {
+            margin-top: 10px;
+            font-weight: bold;
+            color: #000;
+            display: none; /* Hidden by default */
+        }
+    </style>
+</head>
+<body>
+    <div id="prediction-results" class="container">
+        {% if predicted_label %}
+            <h2>Prediction: {{ predicted_label }}</h2>
+            <p>Confidence: {{ confidence }}%</p>
+        {% endif %}
+    </div>
+    <div class="container">
+        <!-- Header with logos -->
+        <header>
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo 1">
+            <h1>Tomato Disease Classifier</h1>
+            <img src="{{ url_for('static', filename='images/logo2.png') }}" alt="Logo 2">
+        </header>
+
+        <!-- Upload form -->
+        <div class="glass-container">
+            <form action="/predict" method="post" enctype="multipart/form-data" class="form-group">
+                <label for="image" class="form-label">Upload an image:</label>
+                <input type="file" name="image" id="image" required onchange="previewImage(this)" class="form-control-file mb-3">
+                
+                <img id="imagePreview" class="img-fluid mb-3" alt="Image Preview">
+
+                <button type="submit" class="btn btn-success btn-block">Upload and Predict</button>
+            </form>
+
+            {% if predicted_label %}
+                <div id="predictionResult" class="alert alert-success mt-4">
+                    <h2>Prediction: {{ predicted_label }}</h2>
+                    <p id="diseaseDescription">{{ disease_description }}</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <section id="recommendations" class="mt-5">
+            <h2 class="text-center">Recommendations for Farmers</h2>
+            <div class="recommendations-container">
+                <!-- Start of Text Carousel -->
+                <div id="textCarousel" class="carousel slide mb-5" data-ride="carousel" data-interval="5000">
+                    <ol class="carousel-indicators">
+                        <li data-target="#textCarousel" data-slide-to="0" class="active"></li>
+                        <li data-target="#textCarousel" data-slide-to="1"></li>
+                        <li data-target="#textCarousel" data-slide-to="2"></li>
+                        <li data-target="#textCarousel" data-slide-to="3"></li>
+                        <li data-target="#textCarousel" data-slide-to="4"></li>
+                        <li data-target="#textCarousel" data-slide-to="5"></li>
+                        <li data-target="#textCarousel" data-slide-to="6"></li>
+                        <li data-target="#textCarousel" data-slide-to="7"></li>
+                        <li data-target="#textCarousel" data-slide-to="8"></li>
+                        <li data-target="#textCarousel" data-slide-to="9"></li>
+                    </ol>
+                    <div class="carousel-inner">
+                        <!-- Slide 1: Bacterial Spot -->
+                        <div class="carousel-item active">
+                            <div class="carousel-caption">
+                                <h5>Bacterial Spot</h5>
+                                <p>Affects tomato leaves with dark, water-soaked spots that grow and merge.</p>
+                                <p><strong>Tip:</strong> Avoid overhead watering and ensure proper crop rotation.</p>
+                            </div>
+                        </div>
+                        <!-- Slide 2: Early Blight -->
+                        <div class="carousel-item">
+                            <div class="carousel-caption">
+                                <h5>Early Blight</h5>
+                                <p>Causes dark concentric rings on older leaves, leading to yellowing and leaf drop.</p>
+                                <p><strong>Tip:</strong> Prune lower leaves and apply fungicides early to control spread.</p>
+                            </div>
+                        </div>
+                        <!-- Slide 3: Late Blight -->
+                        <div class="carousel-item">
+                            <div class="carousel-caption">
+                                <h5>Late Blight</h5>
+                                <p>Leads to large, dark, water-soaked lesions on leaves and stems.</p>
+                                <p><strong>Tip:</strong> Remove and destroy infected plants immediately to limit spread.</p>
+                            </div>
+                        </div>
+                        <!-- Slide 4: Leaf Mold -->
+                        <div class="carousel-item">
+                            <div class="carousel-caption">
+                                <h5>Leaf Mold</h5>
+                                <p>Causes yellow spots on leaves, turning brown or black as the disease progresses.</p>
+                                <p><strong>Tip:</strong> Ensure proper ventilation and avoid overcrowding plants.</p>
+                            </div>
+                        </div>
+                        <!-- Slide 5: Septoria Leaf Spot -->
+                        <div class="carousel-item">
+                            <div class="carousel-caption">
+                                <h5>Septoria Leaf Spot</h5>
+                                <p>Forms small, circular brown spots on leaves, leading to defoliation.</p>
+                                <p><strong>Tip:</strong> Mulch the soil to prevent spore splash-back and remove infected leaves.</p>
+                            </div>
+                        </div>
+                        <!-- Slide 6: Spider Mites -->
+                        <div class="carousel-item">
+                            <div class="carousel-caption">
+                                <h5>Spider Mites</h5>
+                                <p>Causes yellow stippling and webbing on leaves, leading to plant stress.</p>
+                                <p><strong>Tip:</strong> Spray plants with water and introduce predatory mites for control.</p>
+                            </div>
+                        </div>
+                        <!-- Slide 7: Target Spot -->
+                        <div class="carousel-item">
+                            <div class="carousel-caption">
+                                <h5>Target Spot</h5>
+                                <p>Produces small brown spots on leaves that grow into large, irregular lesions.</p>
+                                <p><strong>Tip:</strong> Use drip irrigation and rotate with non-host crops.</p>
+                            </div>
+                        </div>
+                        <!-- Slide 8: Tomato Healthy -->
+                        <div class="carousel-item">
+                            <div class="carousel-caption">
+                                <h5>Healthy Tomato Tips</h5>
+                                <p>Keep plants in good health by maintaining consistent watering and fertilization.</p>
+                                <p><strong>Tip:</strong> Inspect regularly for pests or early signs of disease.</p>
+                            </div>
+                        </div>
+                        <!-- Slide 9: Tomato Yellow Leaf Curl Virus -->
+                        <div class="carousel-item">
+                            <div class="carousel-caption">
+                                <h5>Yellow Leaf Curl Virus</h5>
+                                <p>Causes curling and yellowing of leaves, transmitted by whiteflies.</p>
+                                <p><strong>Tip:</strong> Use sticky traps and plant resistant varieties.</p>
+                            </div>
+                        </div>
+                        <!-- Slide 10: Tomato Mosaic Virus -->
+                        <div class="carousel-item">
+                            <div class="carousel-caption">
+                                <h5>Mosaic Virus</h5>
+                                <p>Produces mottled or mosaic-like patterns on leaves and stunted growth.</p>
+                                <p><strong>Tip:</strong> Disinfect tools and avoid tobacco near plants.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <a class="carousel-control-prev" href="#textCarousel" role="button" data-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="sr-only">Previous</span>
+                    </a>
+                    <a class="carousel-control-next" href="#textCarousel" role="button" data-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="sr-only">Next</span>
+                    </a>
+                </div>
+                <!-- End of Text Carousel -->
+            </div>
+        </section>
+        <!-- About Us section -->
+        <section id="about-us" class="container">
+            <h2 class="text-center">Team Members</h2>
+            <div class="row text-center">
+                <div class="col-md-6">
+                    <img src="{{ url_for('static', filename='images/natu.jpg') }}" alt="Creator 1" class="creator-image">
+                    <h3>Ajiji Jonathan Luka</h3>
+                    <p>AI & ML.</p>
+                </div>
+                <div class="col-md-6">
+                    <img src="{{ url_for('static', filename='images/Folasade.png') }}" alt="Creator 2" class="creator-image">
+                    <h3>Akinsola Folasade</h3>
+                    <p>Data Analyst.</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <p>&copy; 2024 Tomato Disease Classifier | <a href="#" id="contactUsLink" class="text-light">Contact Us</a></p>
+        <p id="emailReveal">jothan.nathan@gmail.com<br>
+            +2347038031357, +234 806 620 3105 
+        </p>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    document.getElementById('imagePreview').src = e.target.result;
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        document.getElementById('contactUsLink').addEventListener('click', function (event) {
+            event.preventDefault();
+            document.getElementById('emailReveal').style.display = 'block';
+        });
+    </script>
+</body>
+</html>
